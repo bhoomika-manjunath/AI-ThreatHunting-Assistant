@@ -1,176 +1,2730 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Threat Hunting Assistant - Accelerate Security Investigations</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HuntForge — Next-Gen AI Threat Hunting & SOC Intelligence</title>
+  
+  <!-- Modern Typography & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Chart.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="index1.css"> <!-- MITRE Search Styles -->
+
+  <style>
+    :root {
+      --bg-base: #060911;
+      --bg-surface: #0c121e;
+      --bg-card: rgba(15, 23, 42, 0.75);
+      --bg-card-hover: rgba(30, 41, 59, 0.85);
+      --border-subtle: rgba(59, 130, 246, 0.2);
+      --border-glow: rgba(6, 182, 212, 0.4);
+      --primary: #3b82f6;
+      --primary-light: #60a5fa;
+      --cyan: #06b6d4;
+      --cyan-glow: rgba(6, 182, 212, 0.3);
+      --emerald: #10b981;
+      --amber: #f59e0b;
+      --crimson: #ef4444;
+      --purple: #a855f7;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      line-height: 1.6;
+      overflow-x: hidden;
+      min-height: 100vh;
+      background-image: 
+        radial-gradient(circle at 20% 15%, rgba(59, 130, 246, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 80% 65%, rgba(6, 182, 212, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 50% 90%, rgba(168, 85, 247, 0.08) 0%, transparent 50%);
+      background-attachment: fixed;
+    }
+
+    /* Ambient Cyber Background Grid */
+    .cyber-grid {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-image: 
+        linear-gradient(to right, rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Navigation Bar */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(6, 9, 17, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      z-index: 1000;
+      padding: 0.85rem 0;
+      transition: all 0.3s ease;
+    }
+
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 800;
+      font-size: 1.35rem;
+      letter-spacing: -0.02em;
+    }
+
+    .logo-icon-wrap {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
+    }
+
+    .brand-badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      background: rgba(6, 182, 212, 0.15);
+      color: var(--cyan);
+      border: 1px solid var(--border-glow);
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.8rem;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: color 0.2s, transform 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .nav-links a:hover, .nav-links a.active {
+      color: #fff;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      padding: 4px 10px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+      border-radius: 20px;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--emerald);
+      box-shadow: 0 0 10px var(--emerald);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.6; }
+    }
+
+    .btn-settings {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 7px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .btn-settings:hover {
+      background: rgba(59, 130, 246, 0.2);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .mobile-toggle {
+      display: none;
+      background: transparent;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    /* Mobile Drawer */
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 65px;
+      left: 0;
+      right: 0;
+      background: rgba(12, 18, 30, 0.98);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 1.5rem;
+      z-index: 999;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    .mobile-menu.open {
+      display: flex;
+    }
+
+    .mobile-menu a {
+      color: var(--text-main);
+      text-decoration: none;
+      font-size: 1.1rem;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* Hero Section */
+    .hero-section {
+      padding: 140px 0 60px;
+      position: relative;
+      text-align: center;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--cyan);
+      margin-bottom: 1.5rem;
+      box-shadow: 0 0 30px rgba(59, 130, 246, 0.15);
+    }
+
+    .hero-title {
+      font-size: 3.8rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 1.25rem;
+      background: linear-gradient(135deg, #ffffff 30%, #93c5fd 70%, #06b6d4 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      max-width: 720px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.7;
+    }
+
+    .hero-cta-group {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 2.5rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6, #06b6d4);
+      color: #fff;
+      padding: 0.9rem 2.2rem;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 10px 25px rgba(6, 182, 212, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 35px rgba(6, 182, 212, 0.45);
+    }
+
+    .btn-secondary {
+      background: rgba(30, 41, 59, 0.6);
+      color: var(--text-main);
+      padding: 0.9rem 1.8rem;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border-subtle);
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    /* Live Prompt Tickers / Pills */
+    .scenario-pill-strip {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .prompt-chip {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-subtle);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .prompt-chip:hover {
+      background: rgba(59, 130, 246, 0.2);
+      border-color: var(--cyan);
+      color: #fff;
+      transform: translateY(-2px);
+    }
+
+    /* Section Global Styles */
+    .section-wrap {
+      padding: 70px 0;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+
+    .section-eyebrow {
+      color: var(--cyan);
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .section-heading {
+      font-size: 2.3rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.02em;
+    }
+
+    .section-desc {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 680px;
+      margin: 0.75rem auto 0;
+    }
+
+    /* Glass Cards */
+    .glass-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.75rem;
+      transition: all 0.3s ease;
+    }
+
+    .glass-card:hover {
+      border-color: rgba(59, 130, 246, 0.4);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    }
+
+    /* KPI Metrics Cards */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .metric-card {
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.9), rgba(12, 18, 30, 0.8));
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.4rem 1.6rem;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .metric-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--cyan));
+      opacity: 0.8;
+    }
+
+    .metric-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .metric-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .metric-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--cyan);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .metric-val {
+      font-size: 2.1rem;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      color: #fff;
+      line-height: 1.2;
+    }
+
+    .metric-foot {
+      margin-top: 0.5rem;
+      font-size: 0.78rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--emerald);
+    }
+
+    /* Dashboard Grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .chart-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chart-box-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 0.85rem;
+    }
+
+    .chart-box-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chart-canvas-wrap {
+      position: relative;
+      height: 260px;
+      width: 100%;
+    }
+
+    /* Live Feed Ticker */
+    .feed-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      overflow-y: auto;
+      max-height: 260px;
+      padding-right: 4px;
+    }
+
+    .feed-item {
+      background: rgba(15, 23, 42, 0.6);
+      border-left: 3px solid var(--primary);
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: background 0.2s;
+    }
+
+    .feed-item:hover {
+      background: rgba(30, 41, 59, 0.7);
+    }
+
+    .feed-meta {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-dim);
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+    }
+
+    .feed-title {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    /* MITRE ATT&CK Matrix Interactive Grid */
+    .mitre-matrix-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      overflow-x: auto;
+    }
+
+    .mitre-matrix-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .matrix-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(170px, 1fr));
+      gap: 0.75rem;
+      min-width: 1050px;
+    }
+
+    .matrix-col {
+      background: rgba(12, 18, 30, 0.7);
+      border: 1px solid rgba(59, 130, 246, 0.15);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .matrix-col-head {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .tech-card {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 6px;
+      padding: 0.5rem 0.65rem;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tech-card:hover {
+      background: rgba(59, 130, 246, 0.25);
+      border-color: var(--cyan);
+      transform: translateX(2px);
+    }
+
+    .tech-card.highlight {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: var(--crimson);
+      color: #fca5a5;
+    }
+
+    .tech-id {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      display: block;
+    }
+
+    .tech-name {
+      font-weight: 600;
+      color: #e2e8f0;
+      margin-top: 2px;
+    }
+
+    /* Core AI Threat Hunting Studio */
+    .studio-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    .studio-card {
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.9) 0%, rgba(10, 15, 26, 0.95) 100%);
+      border: 1px solid var(--border-glow);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(6, 182, 212, 0.1);
+      overflow: hidden;
+    }
+
+    .studio-header {
+      padding: 1.25rem 2rem;
+      background: rgba(12, 18, 30, 0.8);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .studio-title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .studio-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #3b82f6, #06b6d4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+
+    .studio-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .studio-badge {
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(6, 182, 212, 0.15);
+      border: 1px solid var(--border-glow);
+      color: var(--cyan);
+    }
+
+    /* Chat Messages Viewport */
+    .chat-messages {
+      max-height: 520px;
+      overflow-y: auto;
+      padding: 2rem;
+      background: rgba(6, 9, 17, 0.6);
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      scroll-behavior: smooth;
+    }
+
+    .bot-message, .user-message {
+      display: flex;
+      gap: 1.25rem;
+      align-items: flex-start;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .user-message {
+      flex-direction: row-reverse;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 1.1rem;
+      background: linear-gradient(135deg, #1e293b, #334155);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .bot-message .message-avatar {
+      background: linear-gradient(135deg, #3b82f6, #06b6d4);
+      color: #fff;
+      box-shadow: 0 0 15px rgba(6, 182, 212, 0.35);
+    }
+
+    .user-message .message-avatar {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+    }
+
+    .message-bubble {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 1.25rem 1.6rem;
+      color: #e2e8f0;
+      max-width: 85%;
+      position: relative;
+    }
+
+    .user-message .message-bubble {
+      background: rgba(16, 185, 129, 0.1);
+      border-color: rgba(16, 185, 129, 0.3);
+      color: #f1f5f9;
+    }
+
+    /* Analysis Output Styling */
+    .analysis-dossier {
+      margin-top: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .analysis-tabs {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .tab-btn.active {
+      background: rgba(59, 130, 246, 0.2);
+      border-color: var(--primary);
+      color: #60a5fa;
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Visual Charts in Analysis */
+    .analysis-visual-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin: 1.25rem 0;
+    }
+
+    .visual-panel {
+      background: rgba(12, 18, 30, 0.85);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      border-radius: var(--radius-sm);
+      padding: 1.2rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .visual-panel-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--cyan);
+      margin-bottom: 0.75rem;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .visual-panel-canvas {
+      position: relative;
+      height: 190px;
+      width: 100%;
+    }
+
+    .threat-item-block {
+      background: rgba(12, 18, 30, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
+      padding: 1.2rem;
+      margin-bottom: 1rem;
+    }
+
+    .threat-item-title {
+      color: var(--cyan);
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mitre-pill-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.6rem;
+    }
+
+    .mitre-badge {
+      background: rgba(6, 182, 212, 0.15);
+      color: #67e8f9;
+      border: 1px solid rgba(6, 182, 212, 0.35);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-family: var(--font-mono);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* Severity Badges */
+    .sev-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .sev-critical { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
+    .sev-high     { background: rgba(245, 158, 11, 0.2); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.4); }
+    .sev-medium   { background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.4); }
+    .sev-low      { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); }
+
+    /* Code & Sigma Rule Blocks */
+    .code-container {
+      position: relative;
+      margin-top: 0.75rem;
+    }
+
+    .code-copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text-muted);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+
+    .code-copy-btn:hover {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    pre.code-block {
+      background: #090e17;
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      border-radius: 8px;
+      padding: 1.2rem;
+      color: #a5f3fc;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      overflow-x: auto;
+      line-height: 1.6;
+    }
+
+    /* Studio Chat Input Bar */
+    .chat-input-bar {
+      padding: 1.25rem 2rem;
+      background: rgba(12, 18, 30, 0.9);
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+    }
+
+    .input-wrapper {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-end;
+    }
+
+    #chatInput {
+      flex: 1;
+      padding: 1rem 1.25rem;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 12px;
+      background: rgba(6, 9, 17, 0.85);
+      color: #f1f5f9;
+      font-family: var(--font-main);
+      font-size: 0.95rem;
+      resize: vertical;
+      min-height: 68px;
+      transition: all 0.2s;
+    }
+
+    #chatInput:focus {
+      outline: none;
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15);
+    }
+
+    .input-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      min-width: 170px;
+    }
+
+    .btn-analyze {
+      background: linear-gradient(135deg, #3b82f6, #06b6d4);
+      color: #fff;
+      padding: 0.85rem 1.4rem;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-analyze:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(6, 182, 212, 0.4);
+    }
+
+    .btn-analyze:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .export-dropdown-wrap {
+      display: flex;
+      gap: 0.4rem;
+    }
+
+    .btn-export {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+      padding: 0.65rem 1rem;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      flex: 1;
+      transition: all 0.2s;
+    }
+
+    .btn-export:hover:not(:disabled) {
+      background: var(--emerald);
+      color: #fff;
+    }
+
+    .btn-export:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* Features Grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 2rem;
+      transition: all 0.3s;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .feature-card:hover {
+      border-color: var(--cyan);
+      transform: translateY(-4px);
+    }
+
+    .feature-icon-box {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(6, 182, 212, 0.2));
+      border: 1px solid var(--border-glow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--cyan);
+      margin-bottom: 1.25rem;
+    }
+
+    .feature-card h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.75rem;
+    }
+
+    .feature-card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    /* Modal Styling */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: 1.5rem;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-glow);
+      border-radius: var(--radius-md);
+      width: 100%;
+      max-width: 540px;
+      padding: 2rem;
+      position: relative;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1.25rem;
+      right: 1.25rem;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .modal-close:hover {
+      color: #fff;
+    }
+
+    /* Footer */
+    footer {
+      background: #04060a;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 3.5rem 0 2rem;
+      margin-top: 5rem;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr repeat(3, 1fr);
+      gap: 2.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .footer-brand p {
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      margin-top: 0.75rem;
+      max-width: 320px;
+    }
+
+    .footer-col h4 {
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .footer-col ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .footer-col a {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color 0.2s;
+    }
+
+    .footer-col a:hover {
+      color: var(--cyan);
+    }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text-dim);
+      font-size: 0.8rem;
+    }
+
+    /* Spinner Animation */
+    .spin {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Responsive Breakpoints */
+    @media (max-width: 1024px) {
+      .hero-title { font-size: 3rem; }
+      .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .nav-links, .status-pill { display: none; }
+      .mobile-toggle { display: block; }
+      .hero-title { font-size: 2.4rem; }
+      .hero-subtitle { font-size: 1.05rem; }
+      .metrics-grid { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: 1fr; }
+      .analysis-visual-row { grid-template-columns: 1fr; }
+      .input-wrapper { flex-direction: column; }
+      .input-actions { width: 100%; flex-direction: row; }
+      .btn-analyze, .export-dropdown-wrap { flex: 1; }
+      .footer-grid { grid-template-columns: 1fr; }
+      .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
+    }
+  </style>
 </head>
 <body>
-  <!-- Navigation -->
-  <nav>
+
+  <!-- Ambient Grid -->
+  <div class="cyber-grid"></div>
+
+  <!-- Navigation Bar -->
+  <nav id="navbar">
     <div class="container">
       <div class="nav-container">
-        <a href="#" class="logo">🛡 AI Threat Hunter</a>
+        <a href="#" class="brand-logo">
+          <div class="logo-icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              <path d="m9 12 2 2 4-4"></path>
+            </svg>
+          </div>
+          <span>HuntForge</span>
+          <span class="brand-badge">SOC AI 2.5</span>
+        </a>
+
         <div class="nav-links">
+          <a href="#dashboard">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            Dashboard
+          </a>
+          <a href="#mitre-matrix">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="m4.93 4.93 4.24 4.24"></path><path d="m14.83 9.17 4.24-4.24"></path><path d="m14.83 14.83 4.24 4.24"></path><path d="m9.17 14.83-4.24 4.24"></path></svg>
+            MITRE Matrix
+          </a>
+          <a href="#studio">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            Hunt Studio
+          </a>
           <a href="#features">Features</a>
-          <a href="#benefits">Benefits</a>
-          <a href="#demo">Demo</a>
-          <a href="#contact">Contact</a>
+          <a href="#architecture">Architecture</a>
         </div>
 
-        <!-- 🔍 MITRE Search Bar -->
-        <div class="search-bar">
-          <input type="text" id="searchInput" placeholder="Search MITRE ATT&CK..." />
-          <button id="searchBtn" onclick="searchTechniques()">Search</button>
-        </div>
-        
+        <div class="nav-actions">
+          <div class="status-pill">
+            <span class="pulse-dot"></span>
+            <span>INTEL STREAM LIVE</span>
+          </div>
 
+          <button class="btn-settings" id="btnOpenSettings" title="Configure AI & Model Engine">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            <span>Engine</span>
+          </button>
+
+          <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle navigation">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          </button>
+        </div>
       </div>
     </div>
   </nav>
 
-  <!-- MITRE Search Section -->
-  <section class="section section-light" id="mitreSearch">
-    <div class="container">
-        <a href="game.html" class="try-game">Try a Game</a>
-        <a href="graph.html" class="nav-link">Top 10 MITRE ATT&CKs</a>
-
-      <div id="results" class="search-results"></div>
-    </div>
-    
-  </section>
+  <!-- Mobile Drawer Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#dashboard" class="mobile-link">Dashboard</a>
+    <a href="#mitre-matrix" class="mobile-link">MITRE ATT&CK Matrix</a>
+    <a href="#studio" class="mobile-link">AI Threat Studio</a>
+    <a href="#features" class="mobile-link">Features</a>
+    <a href="#architecture" class="mobile-link">Architecture</a>
+  </div>
 
   <!-- Hero Section -->
-  <section class="hero">
+  <section class="hero-section">
     <div class="container">
-      <div class="hero-content">
-        <h1>AI Threat Hunting Assistant</h1>
-        <p class="tagline">Accelerate investigations with AI-powered threat hunting</p>
-        <p class="subtitle">Natural language queries. Instant MITRE mapping. Smarter security.</p>
-        <a href="#demo" class="cta-primary">Request Demo</a>
+      <div class="hero-tag">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        <span>AI-Augmented SOC Threat Hunting Engine</span>
+      </div>
+
+      <h1 class="hero-title">Automate Threat Hunting<br>& MITRE ATT&CK Mapping</h1>
+      
+      <p class="hero-subtitle">
+        Transform raw security anomalies into production-grade Sigma detection rules, kill chain telemetry, and automated IR playbooks in seconds.
+      </p>
+
+      <div class="hero-cta-group">
+        <a href="#studio" class="btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+          <span>Launch AI Hunt Studio</span>
+        </a>
+        <a href="#dashboard" class="btn-secondary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+          <span>View Live Metrics</span>
+        </a>
+      </div>
+
+      <!-- Quick Scenario Launchers -->
+      <div class="scenario-pill-strip">
+        <span style="font-size:0.8rem; color:var(--text-dim); margin-right:4px;">Quick Hunts:</span>
+        <button class="prompt-chip" onclick="loadScenario('lockbit')">⚡ LockBit 3.0 Ransomware</button>
+        <button class="prompt-chip" onclick="loadScenario('passthehash')">🔑 Active Directory Pass-the-Hash</button>
+        <button class="prompt-chip" onclick="loadScenario('cloud_iam')">☁️ AWS IAM Privilege Escalation</button>
+        <button class="prompt-chip" onclick="loadScenario('dnstunnel')">🌐 DNS Tunneling Exfiltration</button>
+        <button class="prompt-chip" onclick="loadScenario('cobalt')">🎯 Cobalt Strike C2 Beaconing</button>
       </div>
     </div>
   </section>
 
-  <!-- Problem Statement -->
-  <section class="section section-dark">
+  <!-- Live SOC Dashboard -->
+  <section class="section-wrap" id="dashboard">
     <div class="container">
-      <h2>The Challenge Security Teams Face</h2>
-      <div class="section-content">
-        <p>Security analysts spend countless hours manually crafting complex log queries, mapping incidents to MITRE ATT&CK frameworks, and searching through documentation to build effective threat hunting strategies.</p>
+      <div class="section-header">
+        <span class="section-eyebrow">Enterprise Telemetry</span>
+        <h2 class="section-heading">Live Threat Hunting Dashboard</h2>
+        <p class="section-desc">Continuous telemetry streaming, kill chain coverage index, and MITRE tactic posture across enterprise assets.</p>
       </div>
-      <div class="problem-grid">
-        <div class="problem-item">
-          <h3>⏱ Time-Intensive Manual Queries</h3>
-          <p>Analysts waste 60-70% of their time writing and refining SIEM queries instead of analyzing threats</p>
+
+      <!-- KPI Metrics -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-top">
+            <span class="metric-label">Active Threat Hunts</span>
+            <div class="metric-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </div>
+          </div>
+          <div class="metric-val" id="metricActiveHunts">48</div>
+          <div class="metric-foot">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg>
+            <span>+14.2% from last cycle</span>
+          </div>
         </div>
-        <div class="problem-item">
-          <h3>🎯 Inconsistent MITRE Mapping</h3>
-          <p>Manual mapping to ATT&CK techniques leads to gaps in coverage and missed threat patterns</p>
+
+        <div class="metric-card">
+          <div class="metric-top">
+            <span class="metric-label">Mean Time to Detect (MTTD)</span>
+            <div class="metric-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </div>
+          </div>
+          <div class="metric-val">3.8 <span style="font-size:1.1rem;font-weight:600;color:var(--text-muted)">min</span></div>
+          <div class="metric-foot">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            <span>-68% reduction vs manual</span>
+          </div>
         </div>
-        <div class="problem-item">
-          <h3>📚 Knowledge Fragmentation</h3>
-          <p>Critical threat intelligence scattered across multiple sources slows down incident response</p>
+
+        <div class="metric-card">
+          <div class="metric-top">
+            <span class="metric-label">Sigma Rule Coverage</span>
+            <div class="metric-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+            </div>
+          </div>
+          <div class="metric-val">98.4<span style="font-size:1.2rem;font-weight:600;color:var(--text-muted)">%</span></div>
+          <div class="metric-foot">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg>
+            <span>2,410 validated rules</span>
+          </div>
         </div>
-        <div class="problem-item">
-          <h3>⚡ Delayed Response Times</h3>
-          <p>Complex query development delays threat detection and extends attacker dwell time</p>
+
+        <div class="metric-card">
+          <div class="metric-top">
+            <span class="metric-label">Dwell Time Prevented</span>
+            <div class="metric-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            </div>
+          </div>
+          <div class="metric-val">94.2<span style="font-size:1.2rem;font-weight:600;color:var(--text-muted)">%</span></div>
+          <div class="metric-foot">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg>
+            <span>Avg 18.5 days saved</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Visual Charts -->
+      <div class="dashboard-grid">
+        <div class="chart-box">
+          <div class="chart-box-header">
+            <div class="chart-box-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+              <span>Weekly Threat Detection Velocity & Hunt Volume</span>
+            </div>
+            <span style="font-size:0.75rem; color:var(--text-dim); font-family:var(--font-mono)">REALTIME SOC AGGREGATION</span>
+          </div>
+          <div class="chart-canvas-wrap">
+            <canvas id="weeklyTrendChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-box">
+          <div class="chart-box-header">
+            <div class="chart-box-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--emerald)" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+              <span>Real-Time SOC Event Feed</span>
+            </div>
+            <span class="status-pill" style="font-size:0.65rem">LIVE</span>
+          </div>
+          <div class="feed-list" id="liveFeedList">
+            <div class="feed-item">
+              <div class="feed-meta"><span>10:42:15 UTC</span><span style="color:var(--crimson)">CRITICAL</span></div>
+              <div class="feed-title">T1059.001 - Encoded PowerShell Execution on WIN-SRV-04</div>
+            </div>
+            <div class="feed-item">
+              <div class="feed-meta"><span>10:39:02 UTC</span><span style="color:var(--amber)">HIGH</span></div>
+              <div class="feed-title">T1078.004 - Cloud IAM Key Creation from anomalous Geo IP</div>
+            </div>
+            <div class="feed-item">
+              <div class="feed-meta"><span>10:31:48 UTC</span><span style="color:var(--primary-light)">MEDIUM</span></div>
+              <div class="feed-title">T1071.004 - Outbound High-Entropy DNS Query Spike</div>
+            </div>
+            <div class="feed-item">
+              <div class="feed-meta"><span>10:20:11 UTC</span><span style="color:var(--emerald)">LOW</span></div>
+              <div class="feed-title">T1087 - Local Account Discovery Sweep via net.exe</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Solution Overview -->
-  <section class="section section-light">
+  <!-- MITRE ATT&CK Matrix Explorer -->
+  <section class="section-wrap" id="mitre-matrix" style="padding-top:20px;">
     <div class="container">
-      <h2>Intelligent Solution Architecture</h2>
-      <div class="section-content">
-        <p>Our AI Threat Hunting Assistant leverages <strong>IBM Granite</strong> foundation models combined with advanced <strong>Retrieval-Augmented Generation (RAG)</strong> technology to transform how security teams operate.</p>
-        <p>By ingesting the complete <strong>MITRE ATT&CK framework</strong>, thousands of <strong>Sigma detection rules</strong>, and proven <strong>incident response playbooks</strong> into an intelligent vector database, the assistant provides instant, context-aware responses to natural language security queries.</p>
-        <p>This powerful combination enables <strong>natural language understanding</strong>, <strong>lightning-fast retrieval</strong> of relevant security intelligence, and <strong>automated query generation</strong> that would typically take analysts hours to develop.</p>
+      <div class="section-header">
+        <span class="section-eyebrow">Framework Alignment</span>
+        <h2 class="section-heading">Interactive MITRE ATT&CK Matrix</h2>
+        <p class="section-desc">Click any enterprise tactic or technique to load curated threat intelligence, Sigma detections, and hunt rules.</p>
+      </div>
+
+      <div class="mitre-matrix-container">
+        <div class="mitre-matrix-header">
+          <div style="font-size:0.9rem; font-weight:700; color:#fff; display:flex; align-items:center; gap:8px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+            <span>ATT&CK Enterprise v14 Heat Matrix</span>
+          </div>
+          <span style="font-size:0.75rem; color:var(--text-dim);">CLICK TECHNIQUE TO INSPECT</span>
+        </div>
+
+        <div class="matrix-grid">
+          <!-- Initial Access -->
+          <div class="matrix-col">
+            <div class="matrix-col-head"><span>Initial Access</span><span>TA0001</span></div>
+            <div class="tech-card highlight" onclick="quickHuntTechnique('T1566.001', 'Spearphishing Attachment', 'Phishing emails delivering weaponized macro document.')">
+              <span class="tech-id">T1566.001</span>
+              <div class="tech-name">Spearphishing Attachment</div>
+            </div>
+            <div class="tech-card" onclick="quickHuntTechnique('T1190', 'Exploit Public App', 'Zero-day vulnerability exploitation on external edge router.')">
+              <span class="tech-id">T1190</span>
+              <div class="tech-name">Exploit Public App</div>
+            </div>
+            <div class="tech-card" onclick="quickHuntTechnique('T1078', 'Valid Accounts', 'Compromised admin credentials via credential stuffing.')">
+              <span class="tech-id">T1078</span>
+              <div class="tech-name">Valid Accounts</div>
+            </div>
+          </div>
+
+          <!-- Execution -->
+          <div class="matrix-col">
+            <div class="matrix-col-head"><span>Execution</span><span>TA0002</span></div>
+            <div class="tech-card highlight" onclick="quickHuntTechnique('T1059.001', 'PowerShell Execution', 'Obfuscated PowerShell script running directly from memory buffer.')">
+              <span class="tech-id">T1059.001</span>
+              <div class="tech-name">PowerShell Obfuscation</div>
+            </div>
+            <div class="tech-card" onclick="quickHuntTechnique('T1204.002', 'Malicious File', 'User double-clicked disguised ISO/LNK payload.')">
+              <span class="tech-id">T1204.002</span>
+              <div class="tech-name">Malicious File Run</div>
+            </div>
+            <div class="tech-card" onclick="quickHuntTechnique('T1047', 'WMI Execution', 'Remote WMI command execution across workstation fleet.')">
+              <span class="tech-id">T1047</span>
+              <div class="tech-name">WMI Command Exec</div>
+            </div>
+          </div>
+
+          <!-- Persistence -->
+          <div class="matrix-col">
+            <div class="matrix-col-head"><span>Persistence</span><span>TA0003</span></div>
+            <div class="tech-card" onclick="quickHuntTechnique('T1053.005', 'Scheduled Task', 'Cron job or Windows Task Scheduler persistence backdoor.')">
+              <span class="tech-id">T1053.005</span>
+              <div class="tech-name">Scheduled Task</div>
+            </div>
+            <div class="tech-card" onclick="quickHuntTechnique('T1547.001', 'Registry Run Keys', 'Auto-start registry key entry placed in CurrentVersion/Run.')">
+              <span class="tech-id">T1547.001</span>
+              <div class="tech-name">Registry Run Keys</div>
+            </div>
+            <div class="tech-card" onclick="quickHuntTechnique('T1136', 'Create Account', 'Rogue backdoor administrator user added locally.')">
+              <span class="tech-id">T1136</span>
+              <div class="tech-name">Create Account</div>
+            </div>
+          </div>
+
+          <!-- Credential Access -->
+          <div class="matrix-col">
+            <div class="matrix-col-head"><span>Credentials</span><span>TA0006</span></div>
+            <div class="tech-card highlight" onclick="quickHuntTechnique('T1003.001', 'LSASS Memory Dump', 'Mimikatz-style extraction of plaintext credentials from lsass.exe.')">
+              <span class="tech-id">T1003.001</span>
+              <div class="tech-name">LSASS Memory Dump</div>
+            </div>
+            <div class="tech-card" onclick="quickHuntTechnique('T1558.003', 'Kerberoasting', 'SPN request targeting service ticket hashes for offline cracking.')">
+              <span class="tech-id">T1558.003</span>
+              <div class="tech-name">Kerberoasting</div>
+            </div>
+            <div class="tech-card" onclick="quickHuntTechnique('T1110.001', 'Password Spraying', 'Slow horizontal authentication attempts across user accounts.')">
+              <span class="tech-id">T1110.001</span>
+              <div class="tech-name">Password Spraying</div>
+            </div>
+          </div>
+
+          <!-- C2 & Exfiltration -->
+          <div class="matrix-col">
+            <div class="matrix-col-head"><span>Command & C2</span><span>TA0011</span></div>
+            <div class="tech-card" onclick="quickHuntTechnique('T1071.001', 'Web Protocol C2', 'Encrypted TLS beaconing to malicious cloud CDN endpoints.')">
+              <span class="tech-id">T1071.001</span>
+              <div class="tech-name">Web Protocol C2</div>
+            </div>
+            <div class="tech-card highlight" onclick="quickHuntTechnique('T1071.004', 'DNS Tunneling', 'Base64 encoded data exfiltration over recursive DNS queries.')">
+              <span class="tech-id">T1071.004</span>
+              <div class="tech-name">DNS Tunneling</div>
+            </div>
+            <div class="tech-card" onclick="quickHuntTechnique('T1573', 'Encrypted Channel', 'Custom asymmetric encrypted payload communication channel.')">
+              <span class="tech-id">T1573</span>
+              <div class="tech-name">Encrypted Channel</div>
+            </div>
+          </div>
+
+          <!-- Impact -->
+          <div class="matrix-col">
+            <div class="matrix-col-head"><span>Impact</span><span>TA0040</span></div>
+            <div class="tech-card highlight" onclick="quickHuntTechnique('T1486', 'Data Encrypted', 'High-speed multithreaded ransomware AES-256 volume encryption.')">
+              <span class="tech-id">T1486</span>
+              <div class="tech-name">Data Encryption</div>
+            </div>
+            <div class="tech-card" onclick="quickHuntTechnique('T1490', 'Inhibit Recovery', 'Deletion of VSS Volume Shadow Copies using vssadmin delete.')">
+              <span class="tech-id">T1490</span>
+              <div class="tech-name">Inhibit Recovery</div>
+            </div>
+            <div class="tech-card" onclick="quickHuntTechnique('T1489', 'Service Stop', 'Terminating database, hypervisor, and antivirus background daemons.')">
+              <span class="tech-id">T1489</span>
+              <div class="tech-name">Service Stop</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- Features -->
-  <section class="section section-dark" id="features">
+  <!-- AI Threat Hunting Studio -->
+  <section class="section-wrap" id="studio">
     <div class="container">
-      <h2>Key Features</h2>
-      <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-icon">💬</div>
-          <h3>Natural Language Interface</h3>
-          <p>Ask questions in plain English: "Show me lateral movement techniques targeting Windows domains" and get precise, actionable results instantly.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🎯</div>
-          <h3>MITRE ATT&CK Automation</h3>
-          <p>Automatic mapping of threats to MITRE techniques with detailed context, sub-techniques, and mitigation strategies.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">📋</div>
-          <h3>Sigma Rule Generation</h3>
-          <p>Generate production-ready Sigma detection rules based on threat scenarios, complete with proper syntax and field mappings.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">📖</div>
-          <h3>IR Playbook Integration</h3>
-          <p>Access contextualized incident response procedures and playbooks tailored to specific threat patterns and attack techniques.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">⚡</div>
-          <h3>Fast Context-Aware Retrieval</h3>
-          <p>Sub-second retrieval from indexed cybersecurity knowledge base with semantic understanding of security concepts.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🧠</div>
-          <h3>IBM Granite AI Engine</h3>
-          <p>Enterprise-grade AI foundation model specifically optimized for cybersecurity use cases and terminology.</p>
-        </div>
+      <div class="section-header">
+        <span class="section-eyebrow">Autonomous Copilot</span>
+        <h2 class="section-heading">AI Threat Hunter Studio</h2>
+        <p class="section-desc">Describe an observed incident, anomalous log sequence, or alert snippet. HuntForge generates full structured MITRE mappings, Sigma rules, kill chains, and playbooks.</p>
       </div>
-    </div>
-  </section>
 
-  <!-- Demo -->
-  <section class="section section-dark" id="demo">
-    <div class="container">
-      <h2>Try the AI Threat Hunter</h2>
-      <div class="section-content">
-        <p>Experience our AI-powered analysis. Describe a cyber fraud case and get instant MITRE ATT&CK analysis with risk assessment and remediation steps.</p>
-      </div>
-      <div class="chatbot-container">
-        <div class="chat-interface">
+      <div class="studio-layout">
+        <div class="studio-card">
+          <!-- Studio Header -->
+          <div class="studio-header">
+            <div class="studio-title-group">
+              <div class="studio-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 12"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+              </div>
+              <div>
+                <div class="studio-title">Threat Investigation Console</div>
+                <div style="font-size:0.75rem; color:var(--text-dim)">Natural Language Threat Analyst Engine v2.5</div>
+              </div>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:0.75rem;">
+              <span class="studio-badge" id="engineStatusBadge">⚡ SMART DEMO MODE</span>
+              <button class="btn-settings" onclick="clearConversation()" style="padding:4px 10px; font-size:0.75rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                <span>Clear</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Messages Container -->
           <div class="chat-messages" id="chatMessages">
             <div class="bot-message">
-              <div class="message-avatar">🤖</div>
-              <div class="message-content">
-                <strong>AI Threat Hunter:</strong> Hello! I'm ready to analyze your cyber fraud case. Please describe the incident details, including any suspicious activities, affected systems, or indicators you've observed.
+              <div class="message-avatar">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+              </div>
+              <div class="message-bubble">
+                <div style="font-weight:700; color:var(--cyan); margin-bottom:0.3rem;">HuntForge SOC Intelligence:</div>
+                <p>Welcome, Senior Threat Hunter. I am ready to evaluate security telemetry, investigate attacker dwell time, and synthesize actionable detections. Type your scenario below or pick a preset above.</p>
               </div>
             </div>
           </div>
-          <div class="chat-input-container">
-            <textarea id="chatInput" placeholder="Describe your cyber fraud case..." rows="3"></textarea>
-            <button id="analyzeBtn" class="analyze-btn">
-              <span id="btnText">Analyze Case</span>
-              <span id="btnLoader" class="loader" style="display: none;">🔄</span>
-            </button>
+
+          <!-- Input Bar -->
+          <div class="chat-input-bar">
+            <div class="input-wrapper">
+              <textarea id="chatInput" placeholder="Describe cyber incident (e.g. 'We noticed unusual PowerShell downloading an executable into %TEMP% followed by LSASS memory dumping and shadow copy deletion...')" rows="2"></textarea>
+              <div class="input-actions">
+                <button id="analyzeBtn" class="btn-analyze" onclick="analyzeCase()">
+                  <span id="btnIcon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                  </span>
+                  <span id="btnText">Analyze Threat</span>
+                  <span id="btnLoader" class="spin" style="display:none;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>
+                  </span>
+                </button>
+                <div class="export-dropdown-wrap">
+                  <button id="exportPdfBtn" class="btn-export" disabled onclick="exportReport('pdf')" title="Export executive report as formatted PDF">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                    <span>PDF Dossier</span>
+                  </button>
+                  <button id="exportSigmaBtn" class="btn-export" disabled onclick="exportReport('sigma')" title="Export Sigma detection rule YAML">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    <span>Sigma .yml</span>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </section>
+
+  <!-- Features Grid -->
+  <section class="section-wrap" id="features">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-eyebrow">Enterprise Capabilities</span>
+        <h2 class="section-heading">Built for SOC Teams & Incident Responders</h2>
+        <p class="section-desc">Empower tier-1 to tier-3 security operations with automated detection engineering and intelligence correlation.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+          </div>
+          <h3>Automated Sigma Rules</h3>
+          <p>Instantly generate syntactically validated Sigma detection YAML rules compatible with Splunk, Microsoft Sentinel, Elastic, and QRadar.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="m4.93 4.93 4.24 4.24"></path><path d="m14.83 9.17 4.24-4.24"></path><path d="m14.83 14.83 4.24 4.24"></path><path d="m9.17 14.83-4.24 4.24"></path></svg>
+          </div>
+          <h3>MITRE ATT&CK Auto-Mapping</h3>
+          <p>Context-aware mapping of observed anomalies to exact Tactics, Techniques, and Sub-techniques with MITRE confidence scoring.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="M12 8v4"></path><path d="M12 16h.01"></path></svg>
+          </div>
+          <h3>Kill Chain Radar Profiler</h3>
+          <p>Dynamic 12-stage Cyber Kill Chain coverage visualization showing progression from Initial Access to Action on Objectives.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+          </div>
+          <h3>One-Click Dossier Export</h3>
+          <p>Generate executive-ready PDF investigation reports, incident timelines, and machine-readable JSON/STIX bundles.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+          </div>
+          <h3>IR Playbook Automation</h3>
+          <p>Receive step-by-step containment, eradication, and post-incident verification procedures tailored to specific attack patterns.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          </div>
+          <h3>Dual LLM & Offline Engine</h3>
+          <p>Zero-dependency high-fidelity offline simulation mode + native support for Anthropic Claude 3.7 & OpenAI GPT-4o API integration.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Architecture Overview -->
+  <section class="section-wrap" id="architecture" style="background:rgba(12, 18, 30, 0.5); border-top:1px solid var(--border-subtle); border-bottom:1px solid var(--border-subtle);">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-eyebrow">System Design</span>
+        <h2 class="section-heading">Intelligent RAG & Detection Pipeline</h2>
+        <p class="section-desc">How HuntForge combines Retrieval-Augmented Generation with real-time cybersecurity telemetry.</p>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.5rem;">
+        <div class="glass-card">
+          <div style="font-family:var(--font-mono); font-size:0.8rem; color:var(--cyan); margin-bottom:0.5rem;">STEP 01</div>
+          <h4 style="color:#fff; font-size:1.1rem; margin-bottom:0.5rem;">Telemetry Ingestion</h4>
+          <p style="color:var(--text-muted); font-size:0.9rem;">Raw Sysmon, Windows Event Logs, EDR telemetry, or natural language SOC analyst observations.</p>
+        </div>
+        <div class="glass-card">
+          <div style="font-family:var(--font-mono); font-size:0.8rem; color:var(--cyan); margin-bottom:0.5rem;">STEP 02</div>
+          <h4 style="color:#fff; font-size:1.1rem; margin-bottom:0.5rem;">Semantic ATT&CK Mapping</h4>
+          <p style="color:var(--text-muted); font-size:0.9rem;">Vector search matching against 14 Tactics, 196+ Techniques, and 411+ Sub-techniques from MITRE ATT&CK v14.</p>
+        </div>
+        <div class="glass-card">
+          <div style="font-family:var(--font-mono); font-size:0.8rem; color:var(--cyan); margin-bottom:0.5rem;">STEP 03</div>
+          <h4 style="color:#fff; font-size:1.1rem; margin-bottom:0.5rem;">Sigma & Logic Synthesis</h4>
+          <p style="color:var(--text-muted); font-size:0.9rem;">Automated compilation of production-ready detection rules with field mappings and false-positive filters.</p>
+        </div>
+        <div class="glass-card">
+          <div style="font-family:var(--font-mono); font-size:0.8rem; color:var(--cyan); margin-bottom:0.5rem;">STEP 04</div>
+          <h4 style="color:#fff; font-size:1.1rem; margin-bottom:0.5rem;">Remediation & Export</h4>
+          <p style="color:var(--text-muted); font-size:0.9rem;">Generation of NIST-aligned containment playbooks and exportable PDF/JSON threat dossiers.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Settings / API Modal -->
+  <div class="modal-backdrop" id="settingsModal">
+    <div class="modal-box">
+      <button class="modal-close" id="btnCloseSettings" aria-label="Close settings">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:1.25rem;">
+        <div class="logo-icon-wrap" style="width:34px; height:34px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </div>
+        <h3 style="color:#fff; font-size:1.2rem;">AI Engine Configuration</h3>
+      </div>
+
+      <p style="color:var(--text-muted); font-size:0.88rem; margin-bottom:1.5rem;">
+        HuntForge comes equipped with an offline Smart Threat Intelligence Engine. You can optionally connect your Anthropic Claude or OpenAI API Key for real-time online inference.
+      </p>
+
+      <div style="margin-bottom:1.25rem;">
+        <label style="display:block; font-size:0.85rem; font-weight:600; color:#e2e8f0; margin-bottom:6px;">Engine Mode</label>
+        <select id="engineModeSelect" style="width:100%; padding:10px 12px; border-radius:8px; background:rgba(6,9,17,0.9); border:1px solid var(--border-subtle); color:#fff; font-family:inherit;">
+          <option value="demo">Smart Offline Simulation Engine (Recommended)</option>
+          <option value="claude">Anthropic Claude API (Sonnet 3.7)</option>
+        </select>
+      </div>
+
+      <div id="apiKeyGroup" style="margin-bottom:1.5rem; display:none;">
+        <label style="display:block; font-size:0.85rem; font-weight:600; color:#e2e8f0; margin-bottom:6px;">Anthropic API Key</label>
+        <input type="password" id="apiKeyInput" placeholder="sk-ant-api..." style="width:100%; padding:10px 12px; border-radius:8px; background:rgba(6,9,17,0.9); border:1px solid var(--border-subtle); color:#fff; font-family:var(--font-mono); font-size:0.85rem;"/>
+        <span style="font-size:0.75rem; color:var(--text-dim); display:block; margin-top:4px;">Keys are kept strictly in browser session memory.</span>
+      </div>
+
+      <button class="btn-primary" style="width:100%; justify-content:center;" onclick="saveSettings()">
+        <span>Save Configuration</span>
+      </button>
+    </div>
+  </div>
 
   <!-- Footer -->
   <footer>
     <div class="container">
-      <p>&copy; 2025 AI Threat Hunting Assistant. All rights reserved. | Built for CISOs, SOC Managers, and Security Analysts</p>
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="#" class="brand-logo">
+            <div class="logo-icon-wrap" style="width:32px; height:32px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            </div>
+            <span>HuntForge</span>
+          </a>
+          <p>Accelerating cybersecurity threat detection, automated Sigma rule compilation, and MITRE ATT&CK enterprise alignment for modern SOCs.</p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Platform</h4>
+          <ul>
+            <li><a href="#dashboard">Live Dashboard</a></li>
+            <li><a href="#mitre-matrix">ATT&CK Matrix</a></li>
+            <li><a href="#studio">AI Hunt Studio</a></li>
+            <li><a href="#features">Sigma Generator</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Standards</h4>
+          <ul>
+            <li><a href="https://attack.mitre.org" target="_blank" rel="noreferrer">MITRE ATT&CK v14</a></li>
+            <li><a href="https://github.com/SigmaHQ/sigma" target="_blank" rel="noreferrer">SigmaHQ Rules</a></li>
+            <li><a href="https://csrc.nist.gov" target="_blank" rel="noreferrer">NIST CSF 2.0</a></li>
+            <li><a href="https://oasis-open.github.io/cti-documentation" target="_blank" rel="noreferrer">STIX 2.1 Standard</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Compliance</h4>
+          <ul>
+            <li><a href="#">SOC 2 Type II Ready</a></li>
+            <li><a href="#">Data Privacy & Air-Gap</a></li>
+            <li><a href="#">Audit Logging</a></li>
+            <li><a href="#">API Security</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>&copy; 2026 HuntForge Security Systems. Built for CISOs, Threat Hunters, and Incident Handlers.</span>
+        <span>Version 2.5.0-PROD</span>
+      </div>
     </div>
   </footer>
 
-  <script src="script.js"></script>
-  <script src="index1.js"></script>
+  <!-- Application Logic -->
+  <script>
+    // --- State & Variables ---
+    let activeCharts = [];
+    let lastAnalysisData = null;
+    let customApiKey = localStorage.getItem('hf_api_key') || '';
+    let engineMode = localStorage.getItem('hf_engine_mode') || 'demo';
+
+    // --- Scenario Bank for Instant Demo ---
+    const SCENARIOS = {
+      lockbit: {
+        title: "LockBit 3.0 Ransomware Attack",
+        prompt: "Detected execution of an unsigned binary in C:\\Users\\Public\\Temp followed by high-volume file rename operations appending .lockbit extension, vssadmin delete shadows execution, and bcdedit recovery disabling.",
+        type: "Ransomware & Destructive Malware",
+        summary: "Execution of suspected LockBit 3.0 ransomware payload. Adversary deleted Volume Shadow Copies to inhibit system recovery and initiated multi-threaded AES-256 file encryption across local and SMB shares.",
+        severity: "CRITICAL — Active file encryption and shadow copy deletion detected.",
+        sevKey: "critical",
+        mitre: [
+          { id: "T1486", name: "Data Encrypted for Impact" },
+          { id: "T1490", name: "Inhibit System Recovery" },
+          { id: "T1059.001", name: "Command and Scripting Interpreter: PowerShell" },
+          { id: "T1204.002", name: "User Execution: Malicious File" }
+        ],
+        killChain: ["Execution", "Defense Evasion", "Impact"],
+        sigma: `title: LockBit Ransomware Inhibit Recovery & Encryption
+id: 9a7f3e12-4c28-4e8b-b1a9-7c42b4d21e01
+status: production
+description: Detects LockBit ransomware behavior including vssadmin deletion of shadow copies and mass encryption.
+references:
+    - https://attack.mitre.org/techniques/T1486/
+    - https://attack.mitre.org/techniques/T1490/
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_vss:
+        CommandLine|contains|all:
+            - 'vssadmin'
+            - 'delete'
+            - 'shadows'
+    selection_bcd:
+        CommandLine|contains|all:
+            - 'bcdedit'
+            - 'recoveryenabled'
+            - 'No'
+    condition: selection_vss or selection_bcd
+fields:
+    - CommandLine
+    - ParentCommandLine
+    - User
+falsepositives:
+    - Legitimate administrator maintenance scripts
+level: critical`,
+        playbook: `1. CONTAINMENT: Immediately isolate infected host from corporate network via EDR / switch port shutdown.
+2. PROCESS TERMINATION: Terminate parent process PID and revoke active Kerberos TGTs for compromised service accounts.
+3. FORENSICS: Dump volatile RAM image and preserve MFT logs before system shutdown.
+4. RESTORATION: Clean re-image host from immutable golden image and restore data from air-gapped backup repository.`,
+        intel: "LockBit 3.0 (LockBit Black) RaaS syndicate known for double-extortion campaigns targeting critical infrastructure and healthcare."
+      },
+      passthehash: {
+        title: "Active Directory Pass-the-Hash & LSASS Dump",
+        prompt: "Multiple Event ID 4624 Type 9 logins observed from workstation WS-102 using NTLM hash authentication followed by procdump.exe targeting lsass.exe and remote PsExec service creation on Domain Controller.",
+        type: "Credential Access & Lateral Movement",
+        summary: "Adversary performed LSASS process memory dump to extract plaintext credentials followed by Pass-the-Hash (PtH) lateral movement targeting Domain Controllers using PsExec service installation.",
+        severity: "HIGH — Domain privilege compromise & unauthorized lateral movement.",
+        sevKey: "high",
+        mitre: [
+          { id: "T1003.001", name: "OS Credential Dumping: LSASS Memory" },
+          { id: "T1550.002", name: "Use Alternate Authentication Material: Pass the Hash" },
+          { id: "T1021.002", name: "Remote Services: SMB/Windows Admin Shares" },
+          { id: "T1569.002", name: "System Services: Service Execution" }
+        ],
+        killChain: ["Credential Access", "Privilege Escalation", "Lateral Movement"],
+        sigma: `title: LSASS Memory Dumping via Process Dumper
+id: 5b28d49a-8802-482d-8e4a-93f8e472091a
+status: production
+description: Detects tools dumping LSASS memory to extract NTLM hashes or plaintext credentials.
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains:
+            - 'lsass'
+        Image|endswith:
+            - 'procdump.exe'
+            - 'dumpert.exe'
+            - 'rundll32.exe'
+    condition: selection
+fields:
+    - Image
+    - CommandLine
+    - ParentImage
+level: high`,
+        playbook: `1. IDENTITY REVOCATION: Force immediate Kerberos krbtgt password reset twice to invalidate forged Golden Tickets.
+2. TIERING: Enforce Protected Users security group and disable NTLM authentication across Tier-0 domain controllers.
+3. LSASS PROTECTION: Enable LSA Protection (RunAsPPL) and Credential Guard via Group Policy.
+4. AUDIT: Review all Event ID 4624 Type 3/9 logins in the preceding 72 hours.`,
+        intel: "Technique attributed to FIN7 and Scattered Spider (UNC3944) targeting enterprise IAM infrastructure."
+      },
+      cloud_iam: {
+        title: "AWS Cloud IAM Privilege Escalation",
+        prompt: "CloudTrail logged unexpected AttachUserPolicy and CreateAccessKey actions from an assumed IAM role originated from an unapproved Tor exit node IP address.",
+        type: "Cloud Infrastructure Compromise",
+        summary: "Attacker compromised IAM role credentials and performed privilege escalation by attaching AdministratorAccess policy and generating persistent long-lived AWS Access Keys.",
+        severity: "CRITICAL — Cloud account takeover & persistent administrative backdoor.",
+        sevKey: "critical",
+        mitre: [
+          { id: "T1078.004", name: "Valid Accounts: Cloud Accounts" },
+          { id: "T1098.001", name: "Account Manipulation: Additional Cloud Credentials" },
+          { id: "T1484", name: "Domain Policy Modification" }
+        ],
+        killChain: ["Initial Access", "Persistence", "Privilege Escalation"],
+        sigma: `title: AWS IAM AdministratorAccess Policy Attached to User
+id: 3c91a478-f21e-4509-91a1-9a741029cbb3
+status: production
+description: Detects unauthorized attachment of administrative IAM policies in AWS CloudTrail logs.
+logsource:
+    service: cloudtrail
+    product: aws
+detection:
+    selection:
+        eventName:
+            - 'AttachUserPolicy'
+            - 'AttachRolePolicy'
+        requestParameters.policyArn:
+            - 'arn:aws:iam::aws:policy/AdministratorAccess'
+    condition: selection
+level: critical`,
+        playbook: `1. CREDENTIAL REVOCATION: Delete created AWS Access Keys and deactivate compromised IAM role immediately.
+2. SESSION TERMINATION: Attach explicit Deny policy to revoke all active assumed role STS sessions.
+3. CLOUDTRAIL AUDIT: Inspect all S3 GetObject, DynamoDB queries, and SecretsManager calls in the session timeframe.
+4. GUARDDUTY: Review VPC Flow Logs for anomalous outbound data exfiltration.`,
+        intel: "Associated with automated cloud crypto-mining and data extortion groups targeting exposed CI/CD keys."
+      },
+      dnstunnel: {
+        title: "DNS Tunneling & Base64 Data Exfiltration",
+        prompt: "Network security sensor alerted on extreme volume of high-entropy TXT and A record queries directed at dynamic subdomains of evil-c2-domain.com with anomalous byte length.",
+        type: "Command & Control and Exfiltration",
+        summary: "Covert data exfiltration utilizing recursive DNS tunneling. Adversary encoded internal database contents in Base64 subdomains bypassing traditional perimeter firewall filtering.",
+        severity: "HIGH — Active covert data exfiltration via DNS protocol.",
+        sevKey: "high",
+        mitre: [
+          { id: "T1071.004", name: "Application Layer Protocol: DNS" },
+          { id: "T1048.003", name: "Exfiltration Over Alternative Protocol" },
+          { id: "T1132.001", name: "Data Encoding: Standard Cryptographic/Base64" }
+        ],
+        killChain: ["Command and Control", "Exfiltration"],
+        sigma: `title: High Frequency High Entropy DNS Queries (DNS Tunneling)
+id: 7e41b901-5231-419a-a82f-28491a5cb101
+status: production
+description: Detects anomalous high-entropy long subdomain DNS requests indicative of DNS tunneling.
+logsource:
+    category: dns_query
+    product: zeek
+detection:
+    selection:
+        query_length|gt: 60
+        query_type: 'TXT'
+    condition: selection
+level: high`,
+        playbook: `1. DNS SINKHOLE: Add malicious root domain to enterprise DNS sinkhole / RPZ firewall blocklist.
+2. ENDPOINT ISOLATION: Identify internal source IP making DNS requests and isolate the host.
+3. DNS INSPECTION: Enable DNS over HTTPS (DoH) inspection and strict query length rate limiting on internal resolvers.
+4. DAMAGE ASSESSMENT: Calculate total extracted DNS query payload bytes to determine exfiltrated record volume.`,
+        intel: "Employed by APT29 (Cozy Bear) and OilRig for resilient egress when HTTPS egress is restricted."
+      },
+      cobalt: {
+        title: "Cobalt Strike C2 Beaconing",
+        prompt: "Endpoint EDR detected rundll32.exe spawned without CLI arguments establishing periodic 45-second jitter connections to external IP 185.220.101.5 over HTTPS with default Cobalt Strike TLS certificate.",
+        type: "Command and Control Beacon",
+        summary: "Active Cobalt Strike malleable C2 beaconing. Payload injected into spawned rundll32.exe process communicating with attacker infrastructure with randomized jitter.",
+        severity: "HIGH — Interactive adversary C2 session established.",
+        sevKey: "high",
+        mitre: [
+          { id: "T1055.001", name: "Process Injection: Dynamic-link Library Injection" },
+          { id: "T1071.001", name: "Application Layer Protocol: Web Protocols" },
+          { id: "T1027", name: "Obfuscated/Compressed Files and Information" }
+        ],
+        killChain: ["Execution", "Defense Evasion", "Command and Control"],
+        sigma: `title: Process Injection into Rundll32 with Network Connection
+id: 1f893d22-192a-4a2b-b891-6284a19bce34
+status: production
+description: Detects rundll32.exe executed without parameters making external HTTPS network connections.
+logsource:
+    category: network_connection
+    product: sysmon
+detection:
+    selection:
+        Image|endswith: '\\rundll32.exe'
+        DestinationPort: 443
+    condition: selection
+level: high`,
+        playbook: `1. ISOLATE HOST: Cut off network connectivity for endpoint WS-204.
+2. MEMORY CAPTURE: Perform process memory dump of rundll32.exe to extract Cobalt Strike Malleable C2 config.
+3. C2 BLOCK: Block IP 185.220.101.5 and associated SSL thumbprint across corporate perimeter firewalls.
+4. HUNT: Search proxy logs for matching URI regex patterns across the entire enterprise.`,
+        intel: "Widespread C2 framework utilized by both advanced penetration testers and state-sponsored APT groups."
+      }
+    };
+
+    // --- Initialize UI & Trend Chart on Load ---
+    window.addEventListener('DOMContentLoaded', () => {
+      initTrendChart();
+      updateEngineBadge();
+      
+      // Auto-focus chat input
+      const chatInput = document.getElementById('chatInput');
+      if (chatInput) {
+        chatInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            analyzeCase();
+          }
+        });
+      }
+
+      // Nav Scroll Glass Effect
+      window.addEventListener('scroll', () => {
+        const nav = document.getElementById('navbar');
+        if (window.scrollY > 50) {
+          nav.style.background = 'rgba(6, 9, 17, 0.95)';
+          nav.style.borderBottomColor = 'rgba(59, 130, 246, 0.35)';
+        } else {
+          nav.style.background = 'rgba(6, 9, 17, 0.85)';
+          nav.style.borderBottomColor = 'rgba(59, 130, 246, 0.2)';
+        }
+      });
+
+      // Mobile Menu Toggle
+      const mobileToggle = document.getElementById('mobileToggle');
+      const mobileMenu = document.getElementById('mobileMenu');
+      if (mobileToggle && mobileMenu) {
+        mobileToggle.addEventListener('click', () => {
+          mobileMenu.classList.toggle('open');
+        });
+        document.querySelectorAll('.mobile-link').forEach(link => {
+          link.addEventListener('click', () => mobileMenu.classList.remove('open'));
+        });
+      }
+
+      // Settings Modal Triggers
+      const btnOpenSettings = document.getElementById('btnOpenSettings');
+      const btnCloseSettings = document.getElementById('btnCloseSettings');
+      const settingsModal = document.getElementById('settingsModal');
+      const engineModeSelect = document.getElementById('engineModeSelect');
+      const apiKeyGroup = document.getElementById('apiKeyGroup');
+      const apiKeyInput = document.getElementById('apiKeyInput');
+
+      if (btnOpenSettings && settingsModal) {
+        btnOpenSettings.addEventListener('click', () => {
+          engineModeSelect.value = engineMode;
+          apiKeyInput.value = customApiKey;
+          apiKeyGroup.style.display = engineMode === 'claude' ? 'block' : 'none';
+          settingsModal.classList.add('open');
+        });
+        btnCloseSettings.addEventListener('click', () => settingsModal.classList.remove('open'));
+        settingsModal.addEventListener('click', (e) => {
+          if (e.target === settingsModal) settingsModal.classList.remove('open');
+        });
+        engineModeSelect.addEventListener('change', () => {
+          apiKeyGroup.style.display = engineModeSelect.value === 'claude' ? 'block' : 'none';
+        });
+      }
+    });
+
+    // --- Save Engine Settings ---
+    function saveSettings() {
+      const mode = document.getElementById('engineModeSelect').value;
+      const key = document.getElementById('apiKeyInput').value.trim();
+      engineMode = mode;
+      customApiKey = key;
+      localStorage.setItem('hf_engine_mode', mode);
+      localStorage.setItem('hf_api_key', key);
+      updateEngineBadge();
+      document.getElementById('settingsModal').classList.remove('open');
+    }
+
+    function updateEngineBadge() {
+      const badge = document.getElementById('engineStatusBadge');
+      if (!badge) return;
+      if (engineMode === 'claude' && customApiKey) {
+        badge.textContent = "⚡ CLAUDE SONNET 3.7 LIVE";
+        badge.style.color = "#a855f7";
+        badge.style.borderColor = "rgba(168, 85, 247, 0.4)";
+        badge.style.background = "rgba(168, 85, 247, 0.15)";
+      } else {
+        badge.textContent = "⚡ SMART DEMO MODE";
+        badge.style.color = "var(--cyan)";
+        badge.style.borderColor = "var(--border-glow)";
+        badge.style.background = "rgba(6, 182, 212, 0.15)";
+      }
+    }
+
+    // --- Trend Line & Bar Chart ---
+    function initTrendChart() {
+      const ctx = document.getElementById('weeklyTrendChart');
+      if (!ctx) return;
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          datasets: [
+            {
+              label: 'Threat Hunts Executed',
+              data: [32, 45, 58, 40, 65, 28, 36],
+              backgroundColor: 'rgba(59, 130, 246, 0.65)',
+              borderRadius: 6,
+              borderSkipped: false
+            },
+            {
+              label: 'Sigma Rules Compiled',
+              data: [18, 24, 38, 26, 48, 15, 22],
+              backgroundColor: 'rgba(6, 182, 212, 0.85)',
+              borderRadius: 6,
+              borderSkipped: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: { color: '#94a3b8', font: { family: 'Plus Jakarta Sans', size: 11 } }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 11 } }
+            },
+            y: {
+              grid: { color: 'rgba(59, 130, 246, 0.1)' },
+              ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 11 } }
+            }
+          }
+        }
+      });
+    }
+
+    // --- Load Pre-Configured Scenarios ---
+    function loadScenario(key) {
+      const sc = SCENARIOS[key];
+      if (!sc) return;
+      const input = document.getElementById('chatInput');
+      input.value = sc.prompt;
+      input.focus();
+      document.getElementById('studio').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // --- Quick Hunt from MITRE Matrix ---
+    function quickHuntTechnique(techId, techName, context) {
+      const input = document.getElementById('chatInput');
+      input.value = `Investigate suspicious activity related to MITRE technique ${techId} (${techName}): ${context}`;
+      document.getElementById('studio').scrollIntoView({ behavior: 'smooth' });
+      analyzeCase();
+    }
+
+    // --- Clear Chat Conversation ---
+    function clearConversation() {
+      const container = document.getElementById('chatMessages');
+      container.innerHTML = `
+        <div class="bot-message">
+          <div class="message-avatar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          </div>
+          <div class="message-bubble">
+            <div style="font-weight:700; color:var(--cyan); margin-bottom:0.3rem;">HuntForge SOC Intelligence:</div>
+            <p>Session reset. Ready for new incident telemetry.</p>
+          </div>
+        </div>
+      `;
+      document.getElementById('exportPdfBtn').disabled = true;
+      document.getElementById('exportSigmaBtn').disabled = true;
+      lastAnalysisData = null;
+    }
+
+    // --- Main Threat Analysis Trigger ---
+    async function analyzeCase() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) {
+        input.focus();
+        return;
+      }
+
+      setLoading(true);
+      addMessage('user', text);
+      input.value = '';
+
+      // Add thinking bubble
+      const botMsgId = 'bot_msg_' + Date.now();
+      const botBubble = addMessage('bot', `
+        <div style="display:flex; align-items:center; gap:8px; color:var(--cyan); font-family:var(--font-mono); font-size:0.85rem;" id="${botMsgId}">
+          <span class="spin">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
+          </span>
+          <span>Correlating ATT&CK tactics, compiling Sigma detection rules & calculating threat vectors...</span>
+        </div>
+      `);
+
+      try {
+        let result = null;
+
+        if (engineMode === 'claude' && customApiKey) {
+          // Call Anthropic API
+          const response = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': customApiKey,
+              'anthropic-version': '2023-06-01',
+              'anthropic-dangerous-direct-browser-calls': 'true'
+            },
+            body: JSON.stringify({
+              model: 'claude-3-7-sonnet-20250219',
+              max_tokens: 2500,
+              system: `You are an elite cybersecurity threat hunter and detection engineer. Respond in structured JSON format with fields: summary, severity (CRITICAL, HIGH, MEDIUM, LOW), sevReason, mitreTechniques (array of {id, name}), killChain (array of stages like Initial Access, Execution, Persistence, Privilege Escalation, Defense Evasion, Credential Access, Discovery, Lateral Movement, Collection, Command and Control, Exfiltration, Impact), sigmaRule (valid YAML string), playbook (numbered steps string), threatIntel (context string).`,
+              messages: [{ role: 'user', content: `Analyze this threat incident scenario: ${text}` }]
+            })
+          });
+
+          if (!response.ok) throw new Error(`Claude API error status ${response.status}`);
+          const data = await response.json();
+          const rawText = data.content.map(c => c.text || '').join('');
+          
+          try {
+            // Attempt JSON parse
+            const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+            result = jsonMatch ? JSON.parse(jsonMatch[0]) : fallbackParse(rawText);
+          } catch(e) {
+            result = fallbackParse(rawText);
+          }
+        } else {
+          // Smart Demo Engine Simulation
+          await new Promise(r => setTimeout(r, 900));
+          result = synthesizeDemoThreat(text);
+        }
+
+        // Render formatted Dossier
+        lastAnalysisData = result;
+        renderDossier(botBubble, result, text);
+
+        // Enable exports
+        document.getElementById('exportPdfBtn').disabled = false;
+        document.getElementById('exportSigmaBtn').disabled = false;
+
+        // Increment active hunt counter
+        const counter = document.getElementById('metricActiveHunts');
+        if (counter) counter.textContent = parseInt(counter.textContent || '48') + 1;
+
+      } catch (err) {
+        console.error(err);
+        botBubble.innerHTML = `
+          <div style="color:#fca5a5; font-size:0.9rem;">
+            <strong>⚠️ Analysis Error:</strong> ${esc(err.message || String(err))}
+            <div style="font-size:0.8rem; color:var(--text-dim); margin-top:4px;">Check your API configuration or switch to Smart Demo mode in Engine settings.</div>
+          </div>
+        `;
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    // --- Smart Demo Synthesis Engine ---
+    function synthesizeDemoThreat(input) {
+      const q = input.toLowerCase();
+      let match = null;
+
+      if (q.includes('lockbit') || q.includes('ransom') || q.includes('encrypt') || q.includes('vssadmin') || q.includes('shadow')) {
+        match = SCENARIOS.lockbit;
+      } else if (q.includes('hash') || q.includes('lsass') || q.includes('mimikatz') || q.includes('ntlm') || q.includes('kerberos') || q.includes('psexec')) {
+        match = SCENARIOS.passthehash;
+      } else if (q.includes('aws') || q.includes('cloud') || q.includes('iam') || q.includes('s3') || q.includes('cloudtrail')) {
+        match = SCENARIOS.cloud_iam;
+      } else if (q.includes('dns') || q.includes('tunnel') || q.includes('txt') || q.includes('exfiltration')) {
+        match = SCENARIOS.dnstunnel;
+      } else if (q.includes('beacon') || q.includes('c2') || q.includes('cobalt') || q.includes('command') || q.includes('rundll32')) {
+        match = SCENARIOS.cobalt;
+      } else {
+        // Dynamic realistic threat generation
+        match = {
+          title: "Anomalous Execution & Evasion Pattern",
+          type: "Multi-Stage Cyber Intrusion",
+          summary: `Observed anomalous execution sequence matching adversary Tactics: ${input.substring(0, 180)}...`,
+          severity: "HIGH — Suspicious process lineage with potential defense evasion.",
+          sevKey: "high",
+          mitre: [
+            { id: "T1059.001", name: "Command and Scripting Interpreter: PowerShell" },
+            { id: "T1027", name: "Obfuscated/Compressed Files and Information" },
+            { id: "T1070", name: "Indicator Removal on Host" }
+          ],
+          killChain: ["Execution", "Defense Evasion", "Discovery"],
+          sigma: `title: Suspicious Script Execution with Obfuscation
+id: e4b2901a-8214-419b-a019-91823abce109
+status: production
+description: Detects suspicious PowerShell script execution with defense evasion techniques.
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        CommandLine|contains:
+            - '-enc'
+            - '-encodedCommand'
+            - 'FromBase64String'
+    condition: selection
+level: high`,
+          playbook: `1. ISOLATION: Sever network access for the originating host.
+2. PROCESS KILL: Terminate suspicious child processes.
+3. LOG AUDIT: Collect event logs 4688 and Sysmon Event 1 for parent process chain.
+4. SCANNING: Trigger full anti-malware scan and inspect scheduled tasks.`,
+          intel: "Pattern frequently observed in commodity malware droppers and Red Team persistence frameworks."
+        };
+      }
+
+      return {
+        summary: match.summary,
+        severity: match.severity,
+        sevKey: match.sevKey,
+        mitreTechniques: match.mitre,
+        killChain: match.killChain,
+        sigmaRule: match.sigma,
+        playbook: match.playbook,
+        threatIntel: match.intel
+      };
+    }
+
+    // --- Render Threat Dossier Tabs & Visualizations ---
+    function renderDossier(container, data, originalPrompt) {
+      const uid = 'hunt_' + Date.now();
+      const sevKey = data.sevKey || 'high';
+      const sevLabel = sevKey.toUpperCase();
+
+      const mitreBadges = (data.mitreTechniques || []).map(m => `
+        <span class="mitre-badge" title="${esc(m.name)}">
+          <strong>${esc(m.id)}</strong> &middot; ${esc(m.name)}
+        </span>
+      `).join('');
+
+      const html = `
+        <div class="analysis-dossier" id="${uid}">
+          <!-- Tabs Bar -->
+          <div class="analysis-tabs">
+            <button class="tab-btn active" onclick="switchDossierTab('${uid}', 'overview')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              <span>Threat Overview</span>
+            </button>
+            <button class="tab-btn" onclick="switchDossierTab('${uid}', 'sigma')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+              <span>Sigma Detection Rule</span>
+            </button>
+            <button class="tab-btn" onclick="switchDossierTab('${uid}', 'playbook')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+              <span>IR Playbook</span>
+            </button>
+            <button class="tab-btn" onclick="switchDossierTab('${uid}', 'intel')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line></svg>
+              <span>Threat Intel</span>
+            </button>
+          </div>
+
+          <!-- Tab 1: Overview -->
+          <div class="tab-content active" id="tab_${uid}_overview">
+            <div class="analysis-visual-row">
+              <div class="visual-panel">
+                <div class="visual-panel-title">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                  <span>Kill Chain Coverage Radar</span>
+                </div>
+                <div class="visual-panel-canvas">
+                  <canvas id="radar_${uid}"></canvas>
+                </div>
+              </div>
+
+              <div class="visual-panel">
+                <div class="visual-panel-title">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+                  <span>Severity & Confidence Index</span>
+                </div>
+                <div class="visual-panel-canvas" style="position:relative;">
+                  <canvas id="gauge_${uid}"></canvas>
+                  <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none;">
+                    <span style="font-size:1.4rem; font-weight:800; font-family:var(--font-mono); color:#fff;">${sevLabel}</span>
+                    <span style="font-size:0.75rem; color:var(--text-muted)">Risk Level</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="threat-item-block">
+              <div class="threat-item-title">
+                <span>Executive Threat Summary</span>
+                <span class="sev-badge sev-${sevKey}">${sevLabel}</span>
+              </div>
+              <p style="color:#cbd5e1; font-size:0.92rem; line-height:1.7;">${esc(data.summary)}</p>
+            </div>
+
+            <div class="threat-item-block">
+              <div class="threat-item-title">
+                <span>MITRE ATT&CK Techniques Mapped</span>
+              </div>
+              <div class="mitre-pill-container">${mitreBadges}</div>
+            </div>
+          </div>
+
+          <!-- Tab 2: Sigma Rule -->
+          <div class="tab-content" id="tab_${uid}_sigma">
+            <div class="threat-item-block">
+              <div class="threat-item-title" style="justify-content:space-between;">
+                <span>Production-Ready Sigma Rule</span>
+                <button class="code-copy-btn" onclick="copyCode(this, 'code_${uid}')">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  <span>Copy YAML</span>
+                </button>
+              </div>
+              <div class="code-container">
+                <pre class="code-block" id="code_${uid}">${esc(data.sigmaRule)}</pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 3: Playbook -->
+          <div class="tab-content" id="tab_${uid}_playbook">
+            <div class="threat-item-block">
+              <div class="threat-item-title">
+                <span>Incident Response Containment Playbook</span>
+              </div>
+              <p style="white-space:pre-line; color:#cbd5e1; font-size:0.92rem; line-height:1.8;">${esc(data.playbook)}</p>
+            </div>
+          </div>
+
+          <!-- Tab 4: Threat Intel -->
+          <div class="tab-content" id="tab_${uid}_intel">
+            <div class="threat-item-block">
+              <div class="threat-item-title">
+                <span>Attribution & Threat Intelligence Context</span>
+              </div>
+              <p style="color:#cbd5e1; font-size:0.92rem; line-height:1.7;">${esc(data.threatIntel)}</p>
+            </div>
+          </div>
+        </div>
+      `;
+
+      container.innerHTML = html;
+
+      // Render Dynamic Radar & Gauge
+      setTimeout(() => {
+        renderAnalysisCharts(uid, data.killChain || [], sevKey);
+      }, 150);
+    }
+
+    // --- Tab Switcher Helper ---
+    function switchDossierTab(uid, tabName) {
+      const parent = document.getElementById(uid);
+      if (!parent) return;
+      parent.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      parent.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+      const activeBtn = parent.querySelector(`button[onclick*="'${tabName}'"]`);
+      const activeContent = document.getElementById(`tab_${uid}_${tabName}`);
+      if (activeBtn) activeBtn.classList.add('active');
+      if (activeContent) activeContent.classList.add('active');
+    }
+
+    // --- Dynamic Radar & Gauge Charts ---
+    function renderAnalysisCharts(uid, activeKillChain, sevKey) {
+      const allStages = [
+        'Initial Access', 'Execution', 'Persistence', 'Privilege Escalation',
+        'Defense Evasion', 'Credential Access', 'Discovery', 'Lateral Movement',
+        'Collection', 'Exfiltration', 'Command & Control', 'Impact'
+      ];
+
+      const scores = allStages.map(st => {
+        const isHit = activeKillChain.some(a => a.toLowerCase().includes(st.toLowerCase()) || st.toLowerCase().includes(a.toLowerCase()));
+        return isHit ? 90 : 15;
+      });
+
+      const radarCanvas = document.getElementById(`radar_${uid}`);
+      if (radarCanvas) {
+        new Chart(radarCanvas, {
+          type: 'radar',
+          data: {
+            labels: allStages,
+            datasets: [{
+              label: 'Kill Chain Coverage',
+              data: scores,
+              backgroundColor: 'rgba(6, 182, 212, 0.2)',
+              borderColor: '#06b6d4',
+              borderWidth: 2,
+              pointBackgroundColor: '#3b82f6',
+              pointRadius: 3
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              r: {
+                beginAtZero: true,
+                max: 100,
+                grid: { color: 'rgba(59, 130, 246, 0.15)' },
+                angleLines: { color: 'rgba(59, 130, 246, 0.15)' },
+                pointLabels: { color: '#94a3b8', font: { family: 'Plus Jakarta Sans', size: 9 } },
+                ticks: { display: false }
+              }
+            }
+          }
+        });
+      }
+
+      const gaugeCanvas = document.getElementById(`gauge_${uid}`);
+      if (gaugeCanvas) {
+        const pct = sevKey === 'critical' ? 95 : sevKey === 'high' ? 80 : sevKey === 'medium' ? 50 : 25;
+        const color = sevKey === 'critical' ? '#ef4444' : sevKey === 'high' ? '#f59e0b' : sevKey === 'medium' ? '#3b82f6' : '#10b981';
+
+        new Chart(gaugeCanvas, {
+          type: 'doughnut',
+          data: {
+            labels: ['Score', 'Remaining'],
+            datasets: [{
+              data: [pct, 100 - pct],
+              backgroundColor: [color, 'rgba(30, 41, 59, 0.6)'],
+              borderWidth: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '72%',
+            plugins: { legend: { display: false } }
+          }
+        });
+      }
+    }
+
+    // --- Clipboard Utility ---
+    function copyCode(btn, codeId) {
+      const code = document.getElementById(codeId);
+      if (!code) return;
+      navigator.clipboard.writeText(code.innerText).then(() => {
+        const original = btn.innerHTML;
+        btn.innerHTML = `
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <span>Copied!</span>
+        `;
+        setTimeout(() => btn.innerHTML = original, 2000);
+      });
+    }
+
+    // --- Message Bubble Helper ---
+    function addMessage(type, content) {
+      const container = document.getElementById('chatMessages');
+      const wrap = document.createElement('div');
+      wrap.className = type === 'user' ? 'user-message' : 'bot-message';
+
+      const avatar = document.createElement('div');
+      avatar.className = 'message-avatar';
+      if (type === 'user') {
+        avatar.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
+      } else {
+        avatar.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`;
+      }
+
+      const bubble = document.createElement('div');
+      bubble.className = 'message-bubble';
+      bubble.innerHTML = type === 'user' ? `<div style="font-weight:700; margin-bottom:0.2rem; color:#6ee7b7">You (Threat Analyst):</div><p>${esc(content)}</p>` : content;
+
+      wrap.appendChild(avatar);
+      wrap.appendChild(bubble);
+      container.appendChild(wrap);
+      container.scrollTop = container.scrollHeight;
+      return bubble;
+    }
+
+    function setLoading(on) {
+      const btn = document.getElementById('analyzeBtn');
+      const text = document.getElementById('btnText');
+      const loader = document.getElementById('btnLoader');
+      const icon = document.getElementById('btnIcon');
+
+      btn.disabled = on;
+      text.style.display = on ? 'none' : 'inline';
+      icon.style.display = on ? 'none' : 'inline';
+      loader.style.display = on ? 'inline' : 'none';
+    }
+
+    function esc(s) {
+      return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // --- Multi-Format Report Export ---
+    function exportReport(format) {
+      if (!lastAnalysisData) return;
+
+      if (format === 'sigma') {
+        const blob = new Blob([lastAnalysisData.sigmaRule || ''], { type: 'text/yaml' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `huntforge_sigma_${Date.now()}.yml`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        return;
+      }
+
+      // PDF Dossier Export
+      const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>HuntForge Threat Analysis Dossier</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1e293b; padding: 40px; max-width: 850px; margin: auto; }
+    .header { border-bottom: 3px solid #3b82f6; padding-bottom: 1rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-end; }
+    h1 { margin: 0; color: #0f172a; font-size: 1.8rem; }
+    .meta { color: #64748b; font-size: 0.85rem; }
+    h2 { color: #1e293b; font-size: 1.2rem; margin-top: 1.8rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.4rem; }
+    pre { background: #f8fafc; border: 1px solid #e2e8f0; padding: 1rem; border-radius: 6px; font-family: monospace; font-size: 0.82rem; white-space: pre-wrap; word-break: break-all; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; }
+    .sev-critical { background: #fee2e2; color: #991b1b; }
+    .sev-high { background: #fef3c7; color: #92400e; }
+    .sev-medium { background: #dbeafe; color: #1e40af; }
+    .sev-low { background: #d1fae5; color: #065f46; }
+    .footer { margin-top: 3rem; text-align: center; color: #94a3b8; font-size: 0.8rem; border-top: 1px solid #e2e8f0; padding-top: 1rem; }
+    @media print { body { padding: 10px; } }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <h1>🛡️ HuntForge — Threat Investigation Dossier</h1>
+      <div class="meta">Classification: SOC RESTRICTED | Generated: ${new Date().toUTCString()}</div>
+    </div>
+    <div>
+      <span class="badge sev-${lastAnalysisData.sevKey}">${lastAnalysisData.sevKey} RISK</span>
+    </div>
+  </div>
+
+  <h2>1. Executive Threat Summary</h2>
+  <p>${esc(lastAnalysisData.summary)}</p>
+
+  <h2>2. MITRE ATT&CK Mapping</h2>
+  <ul>
+    ${(lastAnalysisData.mitreTechniques || []).map(m => `<li><strong>${esc(m.id)}</strong>: ${esc(m.name)}</li>`).join('')}
+  </ul>
+
+  <h2>3. Production Sigma Detection Rule</h2>
+  <pre>${esc(lastAnalysisData.sigmaRule)}</pre>
+
+  <h2>4. Incident Response Containment Playbook</h2>
+  <p style="white-space:pre-line">${esc(lastAnalysisData.playbook)}</p>
+
+  <h2>5. Threat Intelligence & Attribution</h2>
+  <p>${esc(lastAnalysisData.threatIntel)}</p>
+
+  <div class="footer">
+    HuntForge Automated SOC Intelligence Engine &mdash; Confidential & Proprietary
+  </div>
+  <script>window.onload = () => window.print();<\/script>
+</body>
+</html>`;
+
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const win = window.open(url, '_blank');
+      setTimeout(() => URL.revokeObjectURL(url), 15000);
+    }
+  </script>
 </body>
 </html>
