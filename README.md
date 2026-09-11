@@ -3,7 +3,10 @@
 [![MITRE ATT&CK](https://img.shields.io/badge/MITRE%20ATT%26CK-v14.1-blue.svg)](https://attack.mitre.org/)
 [![Sigma](https://img.shields.io/badge/Sigma-Detection%20Rules-teal.svg)](https://github.com/SigmaHQ/sigma)
 [![NIST CSF](https://img.shields.io/badge/NIST-CSF%202.0-green.svg)](https://csrc.nist.gov/)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-000000.svg?logo=vercel&logoColor=white)](https://ai-threat-hunting-assistant.vercel.app)
 [![License](https://img.shields.io/badge/License-MIT-purple.svg)](LICENSE)
+
+🌐 **Live Platform**: [ai-threat-hunting-assistant.vercel.app](https://ai-threat-hunting-assistant.vercel.app)
 
 > **HuntForge** is an advanced AI-augmented cybersecurity threat hunting and detection engineering platform. It bridges the gap between raw, complex security telemetry and rapid incident response by translating natural language incident descriptions into structured MITRE ATT&CK mappings, production-grade Sigma rules, dynamic Cyber Kill Chain profiles, and automated containment playbooks.
 
